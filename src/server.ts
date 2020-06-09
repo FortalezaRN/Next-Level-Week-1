@@ -1,32 +1,14 @@
 import express from 'express';
+import path from 'path';
+import routes from './routes';
 
 const app = express();
-3
-app.use(express.json())
 
-const users = ['Fortaleza', 'DD', 'Danilo', 'Washigton']
+app.use(express.json());
 
-app.get('/users', (request, response) => {
-  const search = String(request.query.search);
-  const filterUsers = search ? users.filter(user => user.includes(search)) : users;
-  console.log('listagem de usuário');
-  return response.json(filterUsers);
-});
+app.use(routes);
 
-app.get('/users/:id', (request, response) => {
-  const id = Number(request.params.id);
-  const user = users[id];
-  console.log('listagem de usuário');
-  return response.json(user);
-});
+app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
-app.post('/users', (request, response) => {
-  const data = request.body;
-  const user = {
-    name: data.name,
-    email: data.email
-  }
-  return response.json(user);
-});
 
 app.listen(3333);
