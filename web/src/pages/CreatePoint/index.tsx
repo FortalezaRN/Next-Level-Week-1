@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
-import { FiArrowLeft } from 'react-icons/fi'
+import { FiArrowLeft, FiCheckCircle } from 'react-icons/fi'
 import { Link, useHistory } from 'react-router-dom';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import { LeafletMouseEvent } from 'leaflet';
@@ -7,6 +7,7 @@ import axios from 'axios';
 
 import './styles.css';
 import api from '../../services/api';
+import Dropzone from '../../components/Dropzone';
 
 import logo from '../../assets/logo.svg';
 
@@ -29,6 +30,7 @@ const CreatePoint = () => {
   const [ufs, setUfs] = useState<string[]>([])
   const [cities, setCities] = useState<string[]>([])
   const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0])
+  const [selectedFile, setSelectedFile] = useState<File>();
 
   const [selectedUf, setSelectedUf] = useState<string>("0")
   const [selectedCity, setSelectedCity] = useState<string>("0")
@@ -109,27 +111,30 @@ const CreatePoint = () => {
 
   async function handleSubmit(event: FormEvent){
     event.preventDefault();
-
     const { name, email, whatsapp } = formData;
     const uf = selectedUf;
     const city = selectedCity;
     const [latitude, longitude] = selectedPosition;
     const items = selectedItems;
 
-    const data = {
-      name,
-      email,
-      whatsapp,
-      uf,
-      city,
-      latitude,
-      longitude,
-      items
-    }
+    const data = new FormData();
+    
+      data.append('name', name);
+      data.append('email', email);
+      data.append('whatsapp', whatsapp);
+      data.append('uf', uf);
+      data.append('city', city);
+      data.append('latitude', String(latitude));
+      data.append('longitude', String(longitude));
+      data.append('items', items.join(','));
+
+      if (selectedFile)
+        data.append('image', selectedFile)
 
     await api.post('points', data);
-    alert('cadastrado com sucesso')
-    history.push('/');
+    const msgSucess = document.getElementById('msg-sucess');
+    msgSucess?.setAttribute('style', 'display: flex; opacity: 1;');
+    setTimeout(()=> history.push('/'), 2000);
   }
 
   return (
@@ -144,6 +149,8 @@ const CreatePoint = () => {
       <form onSubmit={handleSubmit}>
         <h1>Cadastro do <br/> ponto de coleta</h1>
         
+        <Dropzone onFileUploaded={setSelectedFile} />
+
         <fieldset>
           <legend>
             <h2>Dados</h2>
@@ -247,6 +254,12 @@ const CreatePoint = () => {
           Cadastrar ponto de coleta
         </button>
       </form>
+      <div id="msg-sucess" className="container__msg-sucesss">
+        <div className="msg-sucess">
+          <FiCheckCircle size={54} color="#34CB79" />
+          <h1>Cadastro concluído!</h1>
+        </div>
+      </div>
     </div>
   )
 }

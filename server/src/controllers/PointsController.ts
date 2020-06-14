@@ -15,14 +15,15 @@ class PointsController{
     .where('uf', String(uf))
     .distinct()
     .select('points.*');
-
+    // console.log(points);
     const serializedPoints = points.map(point => {
+      // console.log(point);
       return {
-        ...points,
+        ...point,
         image_url: `http://192.168.0.30:3333/uploads/${point.image}`
       }
     })
-
+    console.log(serializedPoints);
     response.json(serializedPoints);
   }
   async show(request: Request, response: Response) {
